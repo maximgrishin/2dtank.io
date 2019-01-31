@@ -30,12 +30,8 @@ socket.on('sync', (syncPacket) => {
 });
 
 socket.on('advance', (advancePacket) => {
-  advancePacket.connections.forEach(id => {
+  advancePacket.connections.forEach((id) => {
     battleKeyFrame.tanks[id] = new Tank(0, 0, 1);
-  });
-
-  advancePacket.disconnects.forEach(id => {
-    delete battleKeyFrame.tanks[id];
   });
 
   battleKeyFrame.advancePositions(Battle.KEYFRAME_INTERVAL);
@@ -45,6 +41,10 @@ socket.on('advance', (advancePacket) => {
   });
 
   battleKeyFrame.processShootInput();
+
+  advancePacket.disconnects.forEach((id) => {
+    delete battleKeyFrame.tanks[id];
+  });
 
   battleAnimationFrame.syncDrawable(battleKeyFrame);
   lastAnimationFrameTimestamp = performance.now();

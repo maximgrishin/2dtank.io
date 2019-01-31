@@ -33,71 +33,65 @@ process.on('uncaughtException', (error) => {
 
 io.pending = {
   connections: [],
-  disconnects: [],
-  inputs: {}
+  inputs: {},
+  disconnects: []
 };
 
 io.on('connection', (socket) => {
   io.pending.connections.push(socket.id);
 
-  socket.on('disconnect', () => {
-    const index = io.pending.connections.indexOf(socket.id);
-    if (index !== -1) {
-      // in case player connected and disconnected before the same keyframe
-      // just remove the record from the pending connections list
-      io.pending.connections.splice(connectionIndex, 1);
-    }
-    else {
-      io.pending.disconnects.push(socket.id);
-    }
-  });
-
   socket.on('input', (input) => {
     io.pending.inputs[socket.id] = input;
+  });
+
+  socket.on('disconnect', () => {
+    io.pending.disconnects.push(socket.id);
   });
 });
 
 const battle = new Battle();
 
 const advanceInterval = setInterval(() => {
-  io.pending.connections.forEach(id => {
-    battle.tanks[id] = new Tank(0, 0, 1);
-  });
+  const advancePacket = {
+    connections: [],
+    inputs: {},
+    disconnects: []
+  };
 
-  io.pending.disconnects.forEach(id => {
-    delete battle.tanks[id];
-  });
+  for (let i = io.pending.connections.length - 1; i >= 0; i--) {
+    const id = io.pending.connections[i];
+    battle.tanks[id] = new Tank(0, 0, 1);
+    advancePacket.connections.push(id);
+    io.pending.connections.splice(i, 1);
+  }
 
   battle.advancePositions(Battle.KEYFRAME_INTERVAL);
 
   Object.keys(io.pending.inputs).forEach((id) => {
-    if (typeof battle.tanks[id] !== 'undefined') {
-      battle.tanks[id].input = io.pending.inputs[id];
-    }
+    battle.tanks[id].input = io.pending.inputs[id];
+    advancePacket.inputs[id] = io.pending.inputs[id];
+    delete io.pending.inputs[id];
   });
 
   battle.processShootInput(Battle.KEYFRAME_INTERVAL);
 
+  for (let i = io.pending.disconnects.length - 1; i >= 0; i--) {
+    const id = io.pending.disconnects[i];
+    delete battle.tanks[id];
+    advancePacket.disconnects.push(id);
+    io.pending.disconnects.splice(i, 1);
+  }
+
   Object.keys(battle.tanks).forEach((id) => {
-    if (io.pending.connections.indexOf(id) === -1) {
-      try {
-        io.sockets.sockets[id].emit('advance', {
-          connections: io.pending.connections,
-          disconnects: io.pending.disconnects,
-          inputs: io.pending.inputs
-        });
-      } catch (e) {
-        if (e.name === 'TypeError') {
-          console.log('That error again! No idea why is it there and how to fix it');
-        }
-      }
+    if (advancePacket.connections.indexOf(id) === -1) {
+      io.sockets.sockets[id].emit('advance', {
+        connections: advancePacket.connections,
+        inputs: advancePacket.inputs,
+        disconnects: advancePacket.disconnects
+      });
     }
     else {
       io.sockets.sockets[id].emit('sync', battle);
     }
   });
-
-  io.pending.connections = [];
-  io.pending.disconnects = [];
-  io.pending.inputs = {};
 }, Battle.KEYFRAME_INTERVAL);
