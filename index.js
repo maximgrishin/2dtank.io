@@ -88,8 +88,7 @@ const advanceInterval = setInterval(() => {
         });
       } catch (e) {
         if (e.name === 'TypeError') {
-          delete battle.tanks[id];
-          io.pending.disconnects.push(id);
+          console.log('That error again! No idea why is it there and how to fix it');
         }
       }
     }
