@@ -1,9 +1,9 @@
 class Input {
   constructor() {
-	  this.forward = false;
-	  this.backward = false;
-	  this.left = false;
-	  this.right = false;
+    this.forward = false;
+    this.backward = false;
+    this.right = false;
+    this.left = false;
     this.turretAngle = 0;
     this.shoot = false;
   }
