@@ -33,9 +33,15 @@ class Battle {
             const y2 = enemyTank.position.y;
             const d = Math.abs((y2 - y1) * Math.cos(alpha) - (x2 - x1) * Math.sin(alpha));
             if (d <= Tank.RADIUS) {
-              enemyTank.position.x = 100;
-              enemyTank.position.y = 100;
-              console.log('hit!');
+              enemyTank.hp -= Tank.TURRET_DAMAGE;
+              if (enemyTank.hp <= 0) {
+                enemyTank.position.x = 0;
+                enemyTank.position.y = 0;
+                enemyTank.hp = Tank.FULL_HP;
+              }
+              if (typeof battleAnimationFrame !== 'undefined') {
+                battleAnimationFrame.effects.hits[enemyId] = Tank.TURRET_DAMAGE;
+              }
             }
           }
         });

@@ -22,6 +22,9 @@ socket.on('sync', (syncPacket) => {
   removeEventListener("mousedown", handleMouseDown);
   addEventListener("mousedown", handleMouseDown);
 
+  removeEventListener("mouseup", handleMouseUp);
+  addEventListener("mouseup", handleMouseUp);
+
   clearInterval(emitInputIntervalId);
   emitInputIntervalId = setInterval(emitInput, Battle.KEYFRAME_INTERVAL);
 

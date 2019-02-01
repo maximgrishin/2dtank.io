@@ -1,6 +1,10 @@
 class BattleDrawable extends Battle {
   constructor() {
     super();
+
+    this.effects = {
+      hits: {}
+    };
   }
 
   syncDrawable(syncPacket) {
@@ -13,20 +17,9 @@ class BattleDrawable extends Battle {
 
   draw() {
     this.drawGrid();
-    ctx.translate(innerWidth / 2 - this.tanks[socket.id].position.x, innerHeight / 2 - this.tanks[socket.id].position.y);
-    Object.keys(this.tanks).forEach((id) => {
-      // draw shooting line
-      /*
-      ctx.beginPath();
-      ctx.moveTo(position.x, position.y);
-      ctx.lineTo(position.x + 2000*Math.cos(position.turretAngle), position.y + 2000*Math.sin(position.turretAngle));
-      ctx.closePath();
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = ((tank.load <= Tank.FULL_LOAD / 7) ? 'red' : 'black');
-      ctx.stroke();
-      */
-      this.tanks[id].draw(id);
-    });
+    this.drawTanks();
+    this.drawHealthBar();
+    this.drawLoadBar();
   }
 
   drawGrid() {
@@ -44,5 +37,73 @@ class BattleDrawable extends Battle {
     ctx.strokeStyle = 'rgba(234, 234, 234, 1)';
     ctx.lineWidth = 3;
     ctx.stroke();
+  }
+
+  drawTanks() {
+    ctx.save();
+    ctx.translate(innerWidth / 2 - this.tanks[socket.id].position.x, innerHeight / 2 - this.tanks[socket.id].position.y);
+    Object.keys(this.tanks).forEach((id) => {
+      // draw shooting line for debugging
+      /*const position = this.tanks[id].position;
+      const tank = this.tanks[id];
+      ctx.beginPath();
+      ctx.moveTo(position.x, position.y);
+      ctx.lineTo(position.x + 2000*Math.cos(position.turretAngle), position.y + 2000*Math.sin(position.turretAngle));
+      ctx.closePath();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = ((tank.load <= Tank.FULL_LOAD / 7) ? 'rgba(255, 0, 0, 1)' : 'rgba(100, 100, 100, 0.5)');
+      ctx.stroke();
+      */
+      this.tanks[id].draw(id);
+    });
+    ctx.restore();
+  }
+
+  drawHealthBar() {
+    ctx.save();
+
+    ctx.translate(innerWidth / 2, innerHeight / 2 + 70);
+    ctx.scale(90, 60);
+
+    ctx.beginPath();
+    ctx.arc(0.45, 0, 0.05, -Math.PI/2, Math.PI/2);
+    ctx.lineTo(-0.45, 0.05);
+    ctx.arc(-0.45, 0, 0.05, Math.PI/2, -Math.PI/2);
+    ctx.lineTo(0.45, -0.05);
+    ctx.clip();
+    ctx.fillStyle = 'rgba(100, 100, 100, 0.8)';
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.rect(-0.5, -0.05, this.tanks[socket.id].hp / Tank.FULL_HP, 0.1);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(50, 234, 100, 0.5)';
+    ctx.fill();
+
+    ctx.restore();
+  }
+  
+  drawLoadBar() {
+    ctx.save();
+
+    ctx.translate(innerWidth / 2, innerHeight / 2 + 80);
+    ctx.scale(90, 60);
+
+    ctx.beginPath();
+    ctx.arc(0.45, 0, 0.05, -Math.PI/2, Math.PI/2);
+    ctx.lineTo(-0.45, 0.05);
+    ctx.arc(-0.45, 0, 0.05, Math.PI/2, -Math.PI/2);
+    ctx.lineTo(0.45, -0.05);
+    ctx.clip();
+    ctx.fillStyle = 'rgba(100, 100, 100, 0.8)';
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.rect(-0.5, -0.05, this.tanks[socket.id].load / Tank.FULL_LOAD, 0.1);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(50, 50, 255, 0.7)';
+    ctx.fill();
+
+    ctx.restore();
   }
 }

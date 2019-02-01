@@ -52,21 +52,27 @@ class TankDrawable extends Tank {
     ctx.scale(Tank.RADIUS / 5.5, Tank.RADIUS / 5.5);
     ctx.lineWidth = Tank.RADIUS / 80;
 
-    // ctx.shadowBlur = 30;
-    // ctx.shadowColor = 'red';
+    if (typeof battleAnimationFrame.effects.hits[id] !== 'undefined') {
+      ctx.shadowBlur = battleAnimationFrame.effects.hits[id];
+      ctx.shadowColor = 'rgba(220, 120, 100, 1)';
+      battleAnimationFrame.effects.hits[id]--;
+      if (battleAnimationFrame.effects.hits[id] <= 0)
+        delete battleAnimationFrame.effects.hits[id];
+    }
 
     ctx.rotate(this.position.hullAngle);
     ctx.fillStyle = 'rgba(150, 150, 150, 1)';
     ctx.strokeStyle = 'rgba(100, 100, 100, 1)';
     ctx.fill(this.paths2D.tracks);
     ctx.stroke(this.paths2D.tracks);
-    ctx.fillStyle = (id == socket.id) ? 'rgba(120, 120, 220, 1)' : 'rgba(200, 100, 100, 1)';
+    ctx.fillStyle = (id == socket.id) ? 'rgba(120, 120, 220, 1)' : 'rgba(220, 100, 100, 1)';
     ctx.strokeStyle = (id == socket.id) ? 'rgba(70, 70, 170, 1)' : 'rgba(150, 50, 50, 1)';
     ctx.fill(this.paths2D.hull);
     ctx.stroke(this.paths2D.hull);
     ctx.stroke(this.paths2D.armor);
 
     ctx.rotate(this.position.turretAngle - this.position.hullAngle);
+    ctx.translate((1 - this.load / Tank.FULL_LOAD) * -0.75, 0);
     ctx.fillStyle = (id == socket.id) ? 'rgba(100, 100, 200, 1)' : 'rgba(200, 100, 100, 1)';
     ctx.strokeStyle = (id == socket.id) ? 'rgba(50, 50, 150, 1)' : 'rgba(120, 40, 40, 1)';
     ctx.fill(this.paths2D.turretBorder);

@@ -1,7 +1,9 @@
 class Tank {
   static get HULL_SPEED() { return 250; }
   static get TURRET_SPEED() { return 3.5; }
-  static get FULL_LOAD() { return 1000; }
+  static get FULL_LOAD() { return 1500; }
+  static get FULL_HP() { return 100; }
+  static get TURRET_DAMAGE() { return 25; }
   static get RADIUS() { return 40; }
   static get HULL_ROTATION_RADIUS() { return 100; }
   // HULL_ROTATION_SPEED === HULL_SPEED / HULL_ROTATION_RADIUS
@@ -15,6 +17,7 @@ class Tank {
     }
     this.load = Tank.FULL_LOAD;
     this.input = new Input();
+    this.hp = Tank.FULL_HP;
   }
 
   sync(syncPacketTank) {
@@ -74,9 +77,9 @@ class Tank {
     this.position = this.predictPosition(dt);
     if (this.load < Tank.FULL_LOAD) {
       this.load += dt;
-      if (this.load > Tank.FULL_LOAD) {
-        this.load = Tank.FULL_LOAD;
-      }
+    }
+    if (this.load > Tank.FULL_LOAD) {
+      this.load = Tank.FULL_LOAD;
     }
   }
 

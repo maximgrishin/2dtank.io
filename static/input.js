@@ -1,8 +1,10 @@
 const input = new Input();
+let mouseDown = false;
 
 const emitInput = () => {
   socket.emit('input', input);
-  input.shoot = false;
+  if (mouseDown === false)
+    input.shoot = false;
 }
 
 const handleKeyDown = (event) => {
@@ -80,4 +82,9 @@ const handleMouseMove = (event) => {
 
 const handleMouseDown = (event) => {
   input.shoot = true;
+  mouseDown = true;
+}
+
+const handleMouseUp = (event) => {
+  mouseDown = false;
 }
