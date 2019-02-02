@@ -50,12 +50,13 @@ class TankDrawable extends Tank {
 
     ctx.translate(this.position.x, this.position.y);
     ctx.font = 'bold 15px serif';
+    ctx.fillStyle = 'grey';
     if (id !== socket.id) {
-      ctx.textAlign = "center";
+      ctx.textAlign = 'center';
       ctx.fillText(`${this.nick}`, 0, 80);
     }
-    ctx.scale(Tank.RADIUS / 5.5, Tank.RADIUS / 5.5);
-    ctx.lineWidth = Tank.RADIUS / 80;
+    ctx.scale(40 / 5.5, 40 / 5.5);
+    ctx.lineWidth = 40 / 80;
 
     if (typeof battleAnimationFrame.effects.hits[id] !== 'undefined') {
       ctx.shadowBlur = battleAnimationFrame.effects.hits[id];

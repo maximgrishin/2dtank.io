@@ -1,5 +1,7 @@
 class Battle {
   static get KEYFRAME_INTERVAL() { return 200; }
+  static get WIDTH() { return 1500; }
+  static get HEIGHT() { return 1500; }
 
   constructor() {
     this.tanks = {};
@@ -14,8 +16,46 @@ class Battle {
   }
 
   advancePositions(dt) {
-    Object.keys(this.tanks).forEach((id) => {
+    const sortedTankIds = Object.keys(this.tanks).sort();
+    sortedTankIds.forEach((id) => {
       this.tanks[id].advance(dt);
+    });
+    sortedTankIds.forEach((id) => {
+      sortedTankIds.forEach((enemyId) => {
+        const position = this.tanks[id].position;
+        const enemyPosition = this.tanks[enemyId].position;
+        const dx = position.x - enemyPosition.x;
+        const dy = position.y - enemyPosition.y;
+        const distance = Math.sqrt(dx*dx + dy*dy);
+        const collisionDistance = 2*Tank.RADIUS;
+        if (distance < collisionDistance) {
+          if (distance == 0) {
+            position.y += collisionDistance/2;
+            enemyPosition.y -= collisionDistance/2;
+          }
+          else {
+						position.x += dx*(collisionDistance/distance - 1)/2;
+            enemyPosition.x -= dx*(collisionDistance/distance - 1)/2;
+						position.y += dy*(collisionDistance/distance - 1)/2;
+						enemyPosition.y -= dy*(collisionDistance/distance - 1)/2;
+          }
+        }
+      });
+    });
+    sortedTankIds.forEach((id) => {
+      const position = this.tanks[id].position;
+      if (position.x > Battle.WIDTH/2 - Tank.RADIUS) {
+        position.x = Battle.WIDTH/2 - Tank.RADIUS;
+      }
+      if (position.x < -Battle.WIDTH/2 + Tank.RADIUS) {
+        position.x = -Battle.WIDTH/2 + Tank.RADIUS;
+      }
+      if (position.y > Battle.HEIGHT/2 - Tank.RADIUS) {
+        position.y = Battle.HEIGHT/2 - Tank.RADIUS;
+      }
+      if (position.y < -Battle.HEIGHT/2 + Tank.RADIUS) {
+        position.y = -Battle.HEIGHT/2 + Tank.RADIUS;
+      }
     });
   }
 

@@ -4,7 +4,7 @@ class Tank {
   static get FULL_LOAD() { return 1500; }
   static get FULL_HP() { return 100; }
   static get TURRET_DAMAGE() { return 25; }
-  static get RADIUS() { return 40; }
+  static get RADIUS() { return 45; }
   static get HULL_ROTATION_RADIUS() { return 100; }
   // HULL_ROTATION_SPEED === HULL_SPEED / HULL_ROTATION_RADIUS
 

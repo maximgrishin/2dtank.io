@@ -18,12 +18,30 @@ class BattleDrawable extends Battle {
   }
 
   draw() {
+    ctx.beginPath();
+    ctx.rect(0, 0, innerWidth, innerHeight);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(234, 234, 234, 1)';
+    ctx.fill();
+
+    ctx.save();
+    ctx.translate(innerWidth / 2 - this.tanks[socket.id].position.x, innerHeight / 2 - this.tanks[socket.id].position.y);
+
+    ctx.beginPath();
+    ctx.rect(-Battle.WIDTH/2, -Battle.HEIGHT/2, Battle.WIDTH, Battle.HEIGHT);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+    ctx.fill();
+
+    ctx.restore();
+
     this.drawGrid();
     this.drawTanks();
     this.drawHealthBar();
     this.drawLoadBar();
     ctx.font = 'bold 12px serif';
 
+    ctx.fillStyle = 'black';
     ctx.fillText('Kills', innerWidth - 125, 20);
     ctx.fillText('Deaths', innerWidth - 80, 20);
     ctx.fillText('Leaderboard', innerWidth - 300, 20);
@@ -35,7 +53,9 @@ class BattleDrawable extends Battle {
         ctx.fillStyle = 'black';
       }
       ctx.fillText(`${position}. ${line.nick}`, innerWidth - 300, 20 * (1.5 + position));
+      ctx.textAlign = 'right';
       ctx.fillText(`${line.kills}`, innerWidth - 100, 20 * (1.5 + position));
+      ctx.textAlign = 'left';
       ctx.fillText(`${line.deaths}`, innerWidth - 80, 20 * (1.5 + position));
       position++;
     });
