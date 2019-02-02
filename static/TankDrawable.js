@@ -49,6 +49,11 @@ class TankDrawable extends Tank {
     ctx.save();
 
     ctx.translate(this.position.x, this.position.y);
+    ctx.font = 'bold 15px serif';
+    if (id !== socket.id) {
+      ctx.textAlign = "center";
+      ctx.fillText(`${this.nick}`, 0, 80);
+    }
     ctx.scale(Tank.RADIUS / 5.5, Tank.RADIUS / 5.5);
     ctx.lineWidth = Tank.RADIUS / 80;
 
@@ -65,16 +70,16 @@ class TankDrawable extends Tank {
     ctx.strokeStyle = 'rgba(100, 100, 100, 1)';
     ctx.fill(this.paths2D.tracks);
     ctx.stroke(this.paths2D.tracks);
-    ctx.fillStyle = (id == socket.id) ? 'rgba(120, 120, 220, 1)' : 'rgba(220, 100, 100, 1)';
-    ctx.strokeStyle = (id == socket.id) ? 'rgba(70, 70, 170, 1)' : 'rgba(150, 50, 50, 1)';
+    ctx.fillStyle = (id === socket.id) ? 'rgba(120, 120, 220, 1)' : 'rgba(220, 100, 100, 1)';
+    ctx.strokeStyle = (id === socket.id) ? 'rgba(70, 70, 170, 1)' : 'rgba(150, 50, 50, 1)';
     ctx.fill(this.paths2D.hull);
     ctx.stroke(this.paths2D.hull);
     ctx.stroke(this.paths2D.armor);
 
     ctx.rotate(this.position.turretAngle - this.position.hullAngle);
     ctx.translate((1 - this.load / Tank.FULL_LOAD) * -0.75, 0);
-    ctx.fillStyle = (id == socket.id) ? 'rgba(100, 100, 200, 1)' : 'rgba(200, 100, 100, 1)';
-    ctx.strokeStyle = (id == socket.id) ? 'rgba(50, 50, 150, 1)' : 'rgba(120, 40, 40, 1)';
+    ctx.fillStyle = (id === socket.id) ? 'rgba(100, 100, 200, 1)' : 'rgba(200, 100, 100, 1)';
+    ctx.strokeStyle = (id === socket.id) ? 'rgba(50, 50, 150, 1)' : 'rgba(120, 40, 40, 1)';
     ctx.fill(this.paths2D.turretBorder);
     ctx.stroke(this.paths2D.turretBorder);
     ctx.stroke(this.paths2D.turretInsides);

@@ -5,6 +5,8 @@ class BattleDrawable extends Battle {
     this.effects = {
       hits: {}
     };
+
+    this.leaderBoard = [];
   }
 
   syncDrawable(syncPacket) {
@@ -20,10 +22,29 @@ class BattleDrawable extends Battle {
     this.drawTanks();
     this.drawHealthBar();
     this.drawLoadBar();
+    ctx.font = 'bold 12px serif';
+
+    ctx.fillText('Kills', innerWidth - 125, 20);
+    ctx.fillText('Deaths', innerWidth - 80, 20);
+    ctx.fillText('Leaderboard', innerWidth - 300, 20);
+    let position = 1;
+    battleAnimationFrame.leaderboard.forEach((line) => {
+      if (line.id === socket.id) {
+        ctx.fillStyle = 'blue';
+      } else {
+        ctx.fillStyle = 'black';
+      }
+      ctx.fillText(`${position}. ${line.nick}`, innerWidth - 300, 20 * (1.5 + position));
+      ctx.fillText(`${line.kills}`, innerWidth - 100, 20 * (1.5 + position));
+      ctx.fillText(`${line.deaths}`, innerWidth - 80, 20 * (1.5 + position));
+      position++;
+    });
+    //ctx.fillText(`${position}. ${line.nick}: ${line.kills}/${line.deaths}`, innerWidth - 120, 20 * (1));
+
   }
 
   drawGrid() {
-    const CELL_SIZE = 70;
+    const CELL_SIZE = 250;
     ctx.beginPath();
     for (let x = (innerWidth/2 - this.tanks[socket.id].position.x) % CELL_SIZE; x < innerWidth; x += CELL_SIZE) {
       ctx.moveTo(x, 0);
@@ -82,7 +103,7 @@ class BattleDrawable extends Battle {
 
     ctx.restore();
   }
-  
+
   drawLoadBar() {
     ctx.save();
 

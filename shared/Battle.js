@@ -38,6 +38,8 @@ class Battle {
                 enemyTank.position.x = 0;
                 enemyTank.position.y = 0;
                 enemyTank.hp = Tank.FULL_HP;
+                enemyTank.deaths++;
+                tank.kills++;
               }
               if (typeof battleAnimationFrame !== 'undefined') {
                 battleAnimationFrame.effects.hits[enemyId] = Tank.TURRET_DAMAGE;

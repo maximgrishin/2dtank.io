@@ -1,0 +1,70 @@
+/* Fix user-agent */
+
+* {
+  box-sizing: border-box;
+}
+
+html, input {
+  font-family:
+    "HelveticaNeue-Light",
+    "Helvetica Neue Light",
+    "Helvetica Neue",
+    Helvetica,
+    Arial,
+    "Lucida Grande",
+    sans-serif;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Welcome page */
+
+.welcome.page {
+  background-color: #fff;
+}
+
+.welcome.page .form {
+  height: 100px;
+  margin-top: -100px;
+  position: absolute;
+
+  text-align: center;
+  top: 50%;
+  width: 100%;
+}
+
+.welcome.page .form .nickname {
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px solid #000;
+  outline: none;
+  padding-bottom: 15px;
+  text-align: center;
+  width: 400px;
+}
+
+.welcome.page .title {
+  font-size: 200%;
+}
+
+.welcome.page .nickname {
+  font-size: 200%;
+  letter-spacing: 3px;
+}
+
+.welcome.page .title, .welcome.page .nickname {
+  color: #000;
+  font-weight: 100;
+}
+
+/* Battle page */
+
+.battle.page {
+  display: none;
+}

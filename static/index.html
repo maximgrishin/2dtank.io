@@ -1,29 +1,29 @@
 <!DOCTYPE html>
-<html lang="en-US">
-  <head>
-    <meta charset="utf-8">
-    <title>2dtank.io</title>
-    <meta name="description" content="Join the multiplayer tank battle and destroy your enemies">
-    <style>
-      html, body, #canvas {
-        border: 0;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-      }
-    </style>
-  </head>
-  <body>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <title>Game</title>
+  <meta name="description" content="Join the multiplayer tank battle and destroy your enemies">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="battle page">
     <canvas id="canvas"></canvas>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/Input.js"></script>
-    <script src="/Tank.js"></script>
-    <script src="/TankDrawable.js"></script>
-    <script src="/Battle.js"></script>
-    <script src="/BattleDrawable.js"></script>
-    <script src="/input.js"></script>
-    <script src="/animation.js"></script>
-    <script src="/main.js"></script>
-  </body>
-</html>
+  </div>
+  <div class="welcome page">
+    <div class="form">
+      <h1 class="title">What's your nickname?</h1>
+      <input class="nickname" type="text" maxlength="14">
+    </div>
+  </div>
+  </ul>
 
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/Input.js"></script>
+  <script src="/Tank.js"></script>
+  <script src="/TankDrawable.js"></script>
+  <script src="/Battle.js"></script>
+  <script src="/BattleDrawable.js"></script>
+  <script src="/input.js"></script>
+  <script src="/animation.js"></script>
+  <script src="/main.js"></script>
+</body></html>

@@ -28,12 +28,6 @@ const handleKeyDown = (event) => {
     case "ArrowRight":
       input.right = true;
       break;
-    case "KeyJ":
-      input.turretLeft = true;
-      break;
-    case "KeyK":
-      input.turretRight = true;
-      break;
     default:
       return;
 	};
@@ -60,12 +54,6 @@ const handleKeyUp = (event) => {
     case "KeyD":
     case "ArrowRight":
       input.right = false;
-      break;
-    case "KeyJ":
-      input.turretLeft = false;
-      break;
-    case "KeyK":
-      input.turretRight = false;
       break;
     default:
       return;

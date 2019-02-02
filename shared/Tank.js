@@ -15,9 +15,12 @@ class Tank {
       hullAngle,
       turretAngle: hullAngle
     }
+    this.nick = '';
     this.load = Tank.FULL_LOAD;
     this.input = new Input();
     this.hp = Tank.FULL_HP;
+    this.kills = 0;
+    this.deaths = 0;
   }
 
   sync(syncPacketTank) {
