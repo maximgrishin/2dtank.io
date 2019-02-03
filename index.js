@@ -33,64 +33,76 @@ process.on('uncaughtException', (error) => {
 
 io.pending = {
   syncRequests: [],
-  connectionPairs: [],
-  inputPairs: [],
+  joins: [],
+  inputs: [],
   disconnects: []
 };
 
 io.on('connection', (socket) => {
+  const id = socket.id;
   socket.on('join', (nick) => {
+    if (nick === '') {
+      nick = 'unnamed';
+    }
     console.log(`${nick} joined`);
-    io.pending.syncRequests.push(socket.id);
-    io.pending.connectionPairs.push({
-      nick,
-      id: socket.id
-    });
+    io.pending.syncRequests.push(id);
+    io.pending.joins.push({ id, nick });
   });
 
   socket.on('input', (input) => {
-    io.pending.inputPairs.push({
-      input,
-      id: socket.id
-    });
+    io.pending.inputs.push({ id, input });
   });
 
   socket.on('disconnect', () => {
-    io.pending.disconnects.push(socket.id);
+    io.pending.disconnects.push(id);
   });
 });
 
 const battle = new Battle();
-
-const advanceInterval = setInterval(() => {
+setInterval(() => {
   const advancePacket = {
-    connectionPairs: [],
-    inputPairs: [],
+    joins: [],
+    inputs: [],
+    respawns: [],
     disconnects: []
-  };
-
-  for (let i = io.pending.connectionPairs.length - 1; i >= 0; i--) {
-    const id = io.pending.connectionPairs[i].id;
-    const nick = io.pending.connectionPairs[i].nick;
-    battle.tanks[id] = new Tank(0, 0, 1);
-    battle.tanks[id].nick = nick;
-    advancePacket.connectionPairs.push({id, nick});
   }
-  io.pending.connectionPairs.splice(0, advancePacket.connectionPairs.length);
+
+  for (let i = io.pending.joins.length - 1; i >= 0; i--) {
+    const id = io.pending.joins[i].id;
+    const nick = io.pending.joins[i].nick;
+    const x = (Math.random() - 1/2) * (Battle.WIDTH - Tank.HULL_RADIUS);
+    const y = (Math.random() - 1/2) * (Battle.HEIGHT - Tank.HULL_RADIUS);
+    const hullAngle = (Math.random() * 2 - 1) * Math.PI;
+    battle.tanks[id] = new Tank(x, y, hullAngle, nick);
+    advancePacket.joins.push({ id, nick, x, y, hullAngle });
+  }
+  io.pending.joins.splice(0, advancePacket.joins.length);
+
+  Object.keys(battle.respawns).forEach((id) => {
+    battle.respawns[id] -= Battle.KEYFRAME_INTERVAL;
+    if (battle.respawns[id] <= 0) {
+      const x = (Math.random() - 1/2) * (Battle.WIDTH - Tank.HULL_RADIUS);
+      const y = (Math.random() - 1/2) * (Battle.HEIGTH - Tank.HULL_RADIUS);
+      const hullAngle = (Math.random() * 2 - 1) * Math.PI;
+      battle.tanks[id].respawn(x, y, hullAngle);
+      advancePacket.respawns.push({ id, x, y, hullAngle });
+      delete battle.respawns[id];
+    }
+  });
 
   battle.advancePositions(Battle.KEYFRAME_INTERVAL);
 
-  for (let i = io.pending.inputPairs.length - 1; i >= 0; i--) {
-    const id = io.pending.inputPairs[i].id;
-    const input = io.pending.inputPairs[i].input;
+  for (let i = io.pending.inputs.length - 1; i >= 0; i--) {
+    const id = io.pending.inputs[i].id;
+    const input = io.pending.inputs[i].input;
     if (typeof battle.tanks[id] !== 'undefined') {
       battle.tanks[id].input = input;
+      advancePacket.inputs.push({ id, input });
     }
-    advancePacket.inputPairs.push({id, input});
   }
-  io.pending.inputPairs.splice(0, advancePacket.inputPairs.length);
+  io.pending.inputs.splice(0, advancePacket.inputs.length);
 
-  battle.processShootInput(Battle.KEYFRAME_INTERVAL);
+  battle.processShootInput();
 
   for (let i = io.pending.disconnects.length - 1; i >= 0; i--) {
     const id = io.pending.disconnects[i];
@@ -101,11 +113,7 @@ const advanceInterval = setInterval(() => {
 
   Object.keys(battle.tanks).forEach((id) => {
     if (io.pending.syncRequests.indexOf(id) === -1) {
-      io.to(id).emit('advance', {
-        connectionPairs: advancePacket.connectionPairs,
-        inputPairs: advancePacket.inputPairs,
-        disconnects: advancePacket.disconnects
-      });
+      io.to(id).emit('advance', advancePacket);
     }
     else {
       io.to(id).emit('sync', battle);

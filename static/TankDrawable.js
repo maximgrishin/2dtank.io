@@ -1,6 +1,6 @@
 class TankDrawable extends Tank {
-  constructor(x, y, hullAngle) {
-    super(x, y, hullAngle);
+  constructor(x, y, hullAngle, nick) {
+    super(x, y, hullAngle, nick);
 
     this.paths2D = {
       tracks: new Path2D(
@@ -41,7 +41,7 @@ class TankDrawable extends Tank {
         'M 3,2.5 v -5 ' +
         'M 3,1.5 h 1 ' +
         'M 3,-1.5 h 1'
-      ),
+      )
     }
   }
 
@@ -49,38 +49,60 @@ class TankDrawable extends Tank {
     ctx.save();
 
     ctx.translate(this.position.x, this.position.y);
-    ctx.font = 'bold 15px serif';
-    ctx.fillStyle = 'grey';
+
     if (id !== socket.id) {
+      ctx.font = 'bold 15px serif';
+      ctx.fillStyle = 'grey';
       ctx.textAlign = 'center';
       ctx.fillText(`${this.nick}`, 0, 80);
     }
-    ctx.scale(40 / 5.5, 40 / 5.5);
-    ctx.lineWidth = 40 / 80;
 
-    if (typeof battleAnimationFrame.effects.hits[id] !== 'undefined') {
-      ctx.shadowBlur = battleAnimationFrame.effects.hits[id];
+    ctx.scale(7, 7);
+    ctx.lineWidth = 0.5;
+
+    if (typeof battleDrawable.effects.hits[id] !== 'undefined') {
+      ctx.shadowBlur = battleDrawable.effects.hits[id];
       ctx.shadowColor = 'rgba(220, 120, 100, 1)';
-      battleAnimationFrame.effects.hits[id]--;
-      if (battleAnimationFrame.effects.hits[id] <= 0)
-        delete battleAnimationFrame.effects.hits[id];
+      battleDrawable.effects.hits[id]--;
+      if (battleDrawable.effects.hits[id] <= 0) {
+        delete battleDrawable.effects.hits[id];
+      }
     }
 
     ctx.rotate(this.position.hullAngle);
-    ctx.fillStyle = 'rgba(150, 150, 150, 1)';
-    ctx.strokeStyle = 'rgba(100, 100, 100, 1)';
+    if (this.hp <= 0) {
+      ctx.fillStyle = '#111';
+      ctx.strokeStyle = '#000';
+    }
+    else {
+      ctx.fillStyle = 'rgba(150, 150, 150, 1)';
+      ctx.strokeStyle = 'rgba(100, 100, 100, 1)';
+    }
+
     ctx.fill(this.paths2D.tracks);
     ctx.stroke(this.paths2D.tracks);
-    ctx.fillStyle = (id === socket.id) ? 'rgba(120, 120, 220, 1)' : 'rgba(220, 100, 100, 1)';
-    ctx.strokeStyle = (id === socket.id) ? 'rgba(70, 70, 170, 1)' : 'rgba(150, 50, 50, 1)';
+    if (this.hp <= 0) {
+      ctx.fillStyle = '#444';
+      ctx.strokeStyle = '#222';
+    }
+    else {
+      ctx.fillStyle = (id === socket.id) ? 'rgba(120, 120, 220, 1)' : 'rgba(220, 100, 100, 1)';
+      ctx.strokeStyle = (id === socket.id) ? 'rgba(70, 70, 170, 1)' : 'rgba(150, 50, 50, 1)';
+    }
     ctx.fill(this.paths2D.hull);
     ctx.stroke(this.paths2D.hull);
     ctx.stroke(this.paths2D.armor);
 
     ctx.rotate(this.position.turretAngle - this.position.hullAngle);
     ctx.translate((1 - this.load / Tank.FULL_LOAD) * -0.75, 0);
-    ctx.fillStyle = (id === socket.id) ? 'rgba(100, 100, 200, 1)' : 'rgba(200, 100, 100, 1)';
-    ctx.strokeStyle = (id === socket.id) ? 'rgba(50, 50, 150, 1)' : 'rgba(120, 40, 40, 1)';
+    if (this.hp <= 0) {
+      ctx.fillStyle = '#333';
+      ctx.strokeStyle = '#111';
+    }
+    else {
+      ctx.fillStyle = (id === socket.id) ? 'rgba(100, 100, 200, 1)' : 'rgba(200, 100, 100, 1)';
+      ctx.strokeStyle = (id === socket.id) ? 'rgba(50, 50, 150, 1)' : 'rgba(120, 40, 40, 1)';
+    }
     ctx.fill(this.paths2D.turretBorder);
     ctx.stroke(this.paths2D.turretBorder);
     ctx.stroke(this.paths2D.turretInsides);

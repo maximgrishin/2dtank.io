@@ -1,24 +1,27 @@
 class Battle {
   static get KEYFRAME_INTERVAL() { return 200; }
-  static get WIDTH() { return 1500; }
-  static get HEIGHT() { return 1500; }
+  static get WIDTH() { return 1000; }
+  static get HEIGHT() { return 1000; }
 
   constructor() {
     this.tanks = {};
+    this.respawns = {};
   }
 
-  sync(syncPacket) {
+  sync(battleJSON) {
     this.tanks = {};
-    Object.keys(syncPacket.tanks).forEach((id) => {
+    Object.keys(battleJSON.tanks).forEach((id) => {
       this.tanks[id] = new Tank();
-      this.tanks[id].sync(syncPacket.tanks[id]);
+      this.tanks[id].sync(battleJSON.tanks[id]);
     });
   }
 
   advancePositions(dt) {
     const sortedTankIds = Object.keys(this.tanks).sort();
     sortedTankIds.forEach((id) => {
-      this.tanks[id].advance(dt);
+      if (this.tanks[id].hp > 0) {
+        this.tanks[id].advance(dt);
+      }
     });
     sortedTankIds.forEach((id) => {
       sortedTankIds.forEach((enemyId) => {
@@ -27,34 +30,34 @@ class Battle {
         const dx = position.x - enemyPosition.x;
         const dy = position.y - enemyPosition.y;
         const distance = Math.sqrt(dx*dx + dy*dy);
-        const collisionDistance = 2*Tank.RADIUS;
+        const collisionDistance = 2*Tank.HULL_RADIUS;
         if (distance < collisionDistance) {
           if (distance == 0) {
             position.y += collisionDistance/2;
             enemyPosition.y -= collisionDistance/2;
           }
           else {
-						position.x += dx*(collisionDistance/distance - 1)/2;
+            position.x += dx*(collisionDistance/distance - 1)/2;
             enemyPosition.x -= dx*(collisionDistance/distance - 1)/2;
-						position.y += dy*(collisionDistance/distance - 1)/2;
-						enemyPosition.y -= dy*(collisionDistance/distance - 1)/2;
+            position.y += dy*(collisionDistance/distance - 1)/2;
+            enemyPosition.y -= dy*(collisionDistance/distance - 1)/2;
           }
         }
       });
     });
     sortedTankIds.forEach((id) => {
       const position = this.tanks[id].position;
-      if (position.x > Battle.WIDTH/2 - Tank.RADIUS) {
-        position.x = Battle.WIDTH/2 - Tank.RADIUS;
+      if (position.x > Battle.WIDTH/2 - Tank.HULL_RADIUS) {
+        position.x = Battle.WIDTH/2 - Tank.HULL_RADIUS;
       }
-      if (position.x < -Battle.WIDTH/2 + Tank.RADIUS) {
-        position.x = -Battle.WIDTH/2 + Tank.RADIUS;
+      if (position.x < -Battle.WIDTH/2 + Tank.HULL_RADIUS) {
+        position.x = -Battle.WIDTH/2 + Tank.HULL_RADIUS;
       }
-      if (position.y > Battle.HEIGHT/2 - Tank.RADIUS) {
-        position.y = Battle.HEIGHT/2 - Tank.RADIUS;
+      if (position.y > Battle.HEIGHT/2 - Tank.HULL_RADIUS) {
+        position.y = Battle.HEIGHT/2 - Tank.HULL_RADIUS;
       }
-      if (position.y < -Battle.HEIGHT/2 + Tank.RADIUS) {
-        position.y = -Battle.HEIGHT/2 + Tank.RADIUS;
+      if (position.y < -Battle.HEIGHT/2 + Tank.HULL_RADIUS) {
+        position.y = -Battle.HEIGHT/2 + Tank.HULL_RADIUS;
       }
     });
   }
@@ -62,27 +65,27 @@ class Battle {
   processShootInput() {
     Object.keys(this.tanks).forEach((id) => {
       const tank = this.tanks[id];
-      if (tank.shoot()) {
+      if (tank.hp > 0 && tank.shoot()) {
         Object.keys(this.tanks).forEach((enemyId) => {
           const enemyTank = this.tanks[enemyId];
-          if (enemyId !== id) {
+          if (enemyTank.hp > 0 && enemyId !== id) {
             const alpha = tank.position.turretAngle;
             const x1 = tank.position.x;
             const y1 = tank.position.y;
             const x2 = enemyTank.position.x;
             const y2 = enemyTank.position.y;
             const d = Math.abs((y2 - y1) * Math.cos(alpha) - (x2 - x1) * Math.sin(alpha));
-            if (d <= Tank.RADIUS) {
+            if (d <= Tank.HULL_RADIUS) {
               enemyTank.hp -= Tank.TURRET_DAMAGE;
               if (enemyTank.hp <= 0) {
-                enemyTank.position.x = 0;
-                enemyTank.position.y = 0;
-                enemyTank.hp = Tank.FULL_HP;
                 enemyTank.deaths++;
                 tank.kills++;
+                if (typeof module !== 'undefined') {
+                  this.respawns[enemyId] = Tank.RESPAWN_TIME;
+                }
               }
-              if (typeof battleAnimationFrame !== 'undefined') {
-                battleAnimationFrame.effects.hits[enemyId] = Tank.TURRET_DAMAGE;
+              if (typeof module === 'undefined') {
+                battleDrawable.effects.hits[enemyId] = 25;
               }
             }
           }

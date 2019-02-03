@@ -1,33 +1,35 @@
 class Tank {
   static get HULL_SPEED() { return 250; }
-  static get TURRET_SPEED() { return 3.5; }
-  static get FULL_LOAD() { return 1500; }
-  static get FULL_HP() { return 100; }
-  static get TURRET_DAMAGE() { return 25; }
-  static get RADIUS() { return 45; }
+  static get HULL_HP() { return 100; }
+  static get HULL_RADIUS() { return 45; }
   static get HULL_ROTATION_RADIUS() { return 100; }
   // HULL_ROTATION_SPEED === HULL_SPEED / HULL_ROTATION_RADIUS
+  static get TURRET_SPEED() { return 3.5; }
+  static get TURRET_LOAD() { return 1500; }
+  static get TURRET_DAMAGE() { return 25; }
+  static get RESPAWN_TIME() { return 2000; }
 
-  constructor(x, y, hullAngle) {
+  constructor(x, y, hullAngle, nick) {
     this.position = {
       x,
       y,
       hullAngle,
       turretAngle: hullAngle
     }
-    this.nick = '';
-    this.load = Tank.FULL_LOAD;
+    this.nick = nick;
+    this.load = Tank.TURRET_LOAD;
     this.input = new Input();
-    this.hp = Tank.FULL_HP;
+    this.hp = Tank.HULL_HP;
     this.kills = 0;
     this.deaths = 0;
+    this.respawning = 0;
   }
 
-  sync(syncPacketTank) {
-    Object.assign(this, syncPacketTank);
+  sync(tankJSON) {
+    Object.assign(this, tankJSON);
   }
 
-  predictPosition(dt) {
+  advance(dt) {
     const dr = Tank.HULL_SPEED * dt / 1000;
     const radius = Tank.HULL_ROTATION_RADIUS;
     let dHullAngle = 0;
@@ -73,25 +75,29 @@ class Tank {
       turretAngle += 2 * Math.PI;
     }
 
-    return { x, y, hullAngle, turretAngle };
-  }
+    this.position = { x, y, hullAngle, turretAngle };
 
-  advance(dt) {
-    this.position = this.predictPosition(dt);
-    if (this.load < Tank.FULL_LOAD) {
+    if (this.load < Tank.TURRET_LOAD) {
       this.load += dt;
     }
-    if (this.load > Tank.FULL_LOAD) {
-      this.load = Tank.FULL_LOAD;
+    if (this.load > Tank.TURRET_LOAD) {
+      this.load = Tank.TURRET_LOAD;
     }
   }
 
   shoot() {
-    if (this.input.shoot && this.load === Tank.FULL_LOAD) {
+    if (this.input.shoot && this.load === Tank.TURRET_LOAD) {
       this.load = 0;
       return true;
     }
     return false;
+  }
+
+  respawn(x, y, hullAngle) {
+    this.hp = Tank.HULL_HP;
+    this.position.x = x;
+    this.position.y = y;
+    this.position.hullAngle = hullAngle;
   }
 }
 

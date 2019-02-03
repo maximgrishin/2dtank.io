@@ -5,7 +5,7 @@ const emitInput = () => {
   socket.emit('input', input);
   if (mouseDown === false)
     input.shoot = false;
-}
+};
 
 const handleKeyDown = (event) => {
   if (event.defaultPrevented) {
@@ -32,7 +32,7 @@ const handleKeyDown = (event) => {
       return;
 	};
   event.preventDefault();
-}
+};
 
 const handleKeyUp = (event) => {
   if (event.defaultPrevented) {
@@ -59,20 +59,20 @@ const handleKeyUp = (event) => {
       return;
 	}
   event.preventDefault();
-}
+};
 
 const handleMouseMove = (event) => {
   input.turretAngle = Math.atan2(
     event.clientY - innerHeight / 2,
     event.clientX - innerWidth / 2
   );
-}
+};
 
 const handleMouseDown = (event) => {
   input.shoot = true;
   mouseDown = true;
-}
+};
 
 const handleMouseUp = (event) => {
   mouseDown = false;
-}
+};

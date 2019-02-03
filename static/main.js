@@ -1,5 +1,5 @@
-const battleKeyFrame = new Battle();
-const battleAnimationFrame = new BattleDrawable();
+const battle = new Battle();
+const battleDrawable = new BattleDrawable();
 
 const socket = io();
 
@@ -13,13 +13,13 @@ addEventListener("keypress", handleEnter);
 
 let emitInputIntervalId = 0;
 let requestAnimationFrameId = 0;
-socket.on('sync', (syncPacket) => {
+socket.on('sync', (battleJSON) => {
   document.body.style.cursor = 'crosshair';
   document.getElementsByClassName('welcome page')[0].style.display = 'none';
   document.getElementsByClassName('battle page')[0].style.display = 'inline';
   canvas.style.display = 'inline';
-  battleKeyFrame.sync(syncPacket);
-  battleAnimationFrame.syncDrawable(syncPacket);
+  battle.sync(battleJSON);
+  battleDrawable.sync(battleJSON);
   lastAnimationFrameTimestamp = performance.now();
 
   removeEventListener("keydown", handleKeyDown);
@@ -45,42 +45,43 @@ socket.on('sync', (syncPacket) => {
 });
 
 socket.on('advance', (advancePacket) => {
-  advancePacket.connectionPairs.forEach((pair) => {
-		const id = pair.id;
-    const nick = pair.nick;
-    battleKeyFrame.tanks[id] = new Tank(0, 0, 1);
-		battleKeyFrame.tanks[id].nick = nick;
+  advancePacket.joins.forEach((record) => {
+    battle.tanks[record.id] = new Tank(record.x, record.y, record.hullAngle, record.nick);
   });
 
-  battleKeyFrame.advancePositions(Battle.KEYFRAME_INTERVAL);
+	advancePacket.respawns.forEach((record) => {
+    battle.tanks[record.id].respawn(record.x, record.y, record.hullAngle);
+  });
 
-	advancePacket.inputPairs.forEach((inputPair) => {
-		const id = inputPair.id;
-    const input = inputPair.input;
-		if (typeof battleKeyFrame.tanks[id] !== 'undefined') {
-      battleKeyFrame.tanks[id].input = input;
+  battle.advancePositions(Battle.KEYFRAME_INTERVAL);
+
+	advancePacket.inputs.forEach((record) => {
+		const id = record.id;
+    const input = record.input;
+		if (typeof battle.tanks[id] !== 'undefined') {
+      battle.tanks[id].input = input;
 		}
   });
 
-  battleKeyFrame.processShootInput();
+  battle.processShootInput();
 
   advancePacket.disconnects.forEach((id) => {
-    delete battleKeyFrame.tanks[id];
+    delete battle.tanks[id];
   });
 
-  battleAnimationFrame.syncDrawable(battleKeyFrame);
+  battleDrawable.sync(battle);
   lastAnimationFrameTimestamp = performance.now();
 
-	battleAnimationFrame.leaderboard = [];
-	Object.keys(battleKeyFrame.tanks).forEach((id) => {
-		battleAnimationFrame.leaderboard.push({
-			nick: battleKeyFrame.tanks[id].nick,
-			kills: battleKeyFrame.tanks[id].kills,
-			deaths: battleKeyFrame.tanks[id].deaths,
-			id
+	battleDrawable.leaderboard = [];
+	Object.keys(battle.tanks).forEach((id) => {
+		battleDrawable.leaderboard.push({
+			id,
+			nick: battle.tanks[id].nick,
+			kills: battle.tanks[id].kills,
+			deaths: battle.tanks[id].deaths
 		});
 	});
-	battleAnimationFrame.leaderboard.sort((a, b) => {
+	battleDrawable.leaderboard.sort((a, b) => {
 		if (a.kills !== b.kills) {
 			return b.kills - a.kills;
 		} else {
@@ -88,3 +89,17 @@ socket.on('advance', (advancePacket) => {
 		}
 	});
 });
+
+const canvas = document.getElementsByTagName('canvas')[0];;
+const ctx = canvas.getContext('2d');
+let lastAnimationFrameTimestamp = 0;
+const animation = (currentTimestamp) => {
+  requestAnimationFrameId = requestAnimationFrame(animation);
+
+  battleDrawable.advancePositions(currentTimestamp - lastAnimationFrameTimestamp);
+  lastAnimationFrameTimestamp = currentTimestamp;
+
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+  battleDrawable.draw();
+};
