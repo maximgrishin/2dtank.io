@@ -17,10 +17,10 @@ class BattleDrawable extends Battle {
     });
   }
 
-  draw() {
+  draw(currentTimestamp) {
     this.drawBackground();
     this.drawFloor();
-    this.drawTanks();
+    this.drawTanks(currentTimestamp);
     if (battle.tanks[socket.id].hp > 0) {
       this.drawHealthBar();
       this.drawLoadBar();
@@ -62,7 +62,7 @@ class BattleDrawable extends Battle {
     ctx.stroke();
   }
 
-  drawTanks() {
+  drawTanks(currentTimestamp) {
     ctx.save();
     ctx.translate(innerWidth / 2 - this.tanks[socket.id].position.x, innerHeight / 2 - this.tanks[socket.id].position.y);
     Object.keys(this.tanks).forEach((id) => {
@@ -77,7 +77,7 @@ class BattleDrawable extends Battle {
       ctx.strokeStyle = ((tank.load <= Tank.TURRET_LOAD / 7) ? 'rgba(255, 0, 0, 1)' : 'rgba(100, 100, 100, 0.5)');
       ctx.stroke();
       */
-      this.tanks[id].draw(id);
+      this.tanks[id].draw(id, currentTimestamp);
     });
     ctx.restore();
   }

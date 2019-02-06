@@ -101,5 +101,5 @@ const animation = (currentTimestamp) => {
 
   canvas.width = innerWidth;
   canvas.height = innerHeight;
-  battleDrawable.draw();
+  battleDrawable.draw(currentTimestamp);
 };

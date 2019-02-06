@@ -29,23 +29,17 @@ class TankDrawable extends Tank {
       ),
       turretBorder: new Path2D(
         // right part (going from front to back)
-        'M 8,0 v 0.5 q 0,1 -1,1 h -3 q -1,0 -1,1 t -1,1 h -4 q -2,0 -2,-2 v -1.5 ' +
-        // left part
-        'M 8,0 v -0.5 q 0,-1 -1,-1 h -3 q -1,-0 -1,-1 t -1,-1 h -4 q -2,-0 -2,2 v 1.5'
+        'M 2,-2 q 2,2 0,4 l 2,2 h -6 q -2,0 -2,-2 ' +
+        'v -4 q 0,-2 2,-2 h 6 l -2,2'
       ),
       turretInsides: new Path2D(
-        'M -4,1.5 h 1 q 1,0 1,1 v 1 ' + // right arc
-        'M -4,-1.5 h 1 q 1,0 1,-1 v -1 ' + // left arc
-        // lines
-        'M 2,3.5 v -7 ' +
-        'M 3,2.5 v -5 ' +
-        'M 3,1.5 h 1 ' +
-        'M 3,-1.5 h 1'
+        'M 2,-2 h -4 v 4' +
+        'M 2,2 h -4'
       )
     }
   }
 
-  draw(id) {
+  draw(id, currentTimestamp) {
     ctx.save();
 
     ctx.translate(this.position.x, this.position.y);
@@ -94,7 +88,7 @@ class TankDrawable extends Tank {
     ctx.stroke(this.paths2D.armor);
 
     ctx.rotate(this.position.turretAngle - this.position.hullAngle);
-    ctx.translate((1 - this.load / Tank.FULL_LOAD) * -0.75, 0);
+    ctx.translate((1 - this.load / Tank.TURRET_LOAD) * -0.75, 0);
     if (this.hp <= 0) {
       ctx.fillStyle = '#333';
       ctx.strokeStyle = '#111';
@@ -106,6 +100,27 @@ class TankDrawable extends Tank {
     ctx.fill(this.paths2D.turretBorder);
     ctx.stroke(this.paths2D.turretBorder);
     ctx.stroke(this.paths2D.turretInsides);
+
+
+
+  	const R_MAX = 30;
+  	const step = 4;
+  	const an = -1;
+
+    for (let r = (currentTimestamp / 70) % step + 3; r < R_MAX; r += step) {
+      //if ((currentTimestamp - beginTimestamp - r) >= 0) {
+        //if (currentTimestamp - endTimestamp - r <= 0) {
+          ctx.beginPath();
+          ctx.arc(0, 0, r, -Math.PI/4, Math.PI/4);
+
+          ctx.shadowBlur = 5;
+          ctx.shadowColor=(id === socket.id) ? 'rgba(100, 100, 200, 1)' : 'rgba(200, 100, 100, 1)';
+          ctx.strokeStyle = (id === socket.id) ? `rgba(100, 100, 200, ${(R_MAX - r)/R_MAX})` : `rgba(200, 100, 100, ${(R_MAX - r)/R_MAX})`;
+
+          ctx.stroke();
+        //}
+      //}
+    }
 
     ctx.restore();
   }
